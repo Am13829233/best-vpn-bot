@@ -146,10 +146,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     get_user(user_id)
 
     if not await check_membership(context.bot, user_id):
-        kb = InlineKeyboardMarkup([[
-            InlineKeyboardButton("📢 عضویت در کانال", url="https://t.me/bestvpn028")
-        ]])
-        msg = "❌ برای استفاده از ربات باید عضو کانال شوید."
+        kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("📢 عضویت در کانال", url="https://t.me/bestvpn028")],
+            [InlineKeyboardButton("✅ عضو شدم",         callback_data="check_join")],
+        ])
+        msg = "❌ برای استفاده از ربات باید عضو کانال شوید.\n\nبعد از عضویت روی «✅ عضو شدم» بزن."
         if update.message:
             await update.message.reply_text(msg, reply_markup=kb)
         else:
@@ -175,6 +176,14 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if data == "noop":
+        return
+
+    # ── بررسی عضویت بعد از کلیک «عضو شدم» ───────────────────────
+    if data == "check_join":
+        if await check_membership(context.bot, user_id):
+            await start(update, context)
+        else:
+            await query.answer("❌ هنوز عضو کانال نشدی!", show_alert=True)
         return
 
     if data == "back_main":
